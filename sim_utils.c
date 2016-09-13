@@ -19,33 +19,41 @@ int getGraph(FILE *fp)
 		{
 			//new node
 			case 0:
-				printf("DEBUG(line):%s\n", line);
+				//printf("DEBUG(line):%s\n", line);
 				sscanf(line, "%s = %d", nodeA, &number);
-				printf("DEBUG(name): %s\n", nodeA);
-				printf("DEBUG(number): %d\n", number);
-				if(isValid(nodeA) == 1) printf("Name not valid!\n");
-				else printf("Name is valid!\n");
+				//printf("DEBUG(name): %s\n", nodeA);
+				//printf("DEBUG(number): %d\n", number);
+				if(isValid(nodeA) == 1) return 1;//printf("Name not valid!\n");
+				//else printf("Name is valid!\n");
 				break;
 			//new link
 			case -1:
-				printf("DEBUG(line):%s\n", line);
+				//printf("DEBUG(line):%s\n", line);
 				sscanf(line, "%s - %s : %d", nodeA, nodeB, &number);
-				printf("DEBUG(nameA): %s\n", nodeA);
-				printf("DEBUG(nameB): %s\n", nodeB);
-				printf("DEBUG(number): %d\n", number);
+				//printf("DEBUG(nameA): %s\n", nodeA);
+				//printf("DEBUG(nameB): %s\n", nodeB);
+				//printf("DEBUG(number): %d\n", number);
+				if(isValid(nodeA) == 1) return 1;//printf("Name not valid!\n");
+				//else printf("Name is valid!\n");
+				if(isValid(nodeB) == 1) return 1;//printf("Name not valid!\n");
+				//else printf("Name is valid!\n");
 				break;
 			//begin line
 			case -2:
-				printf("DEBUG(line):%s\n", line);
+				//printf("DEBUG(line):%s\n", line);
+				/*
+					Not really elegant, but it works
+					didn't know how to ignore the first string "Graph" but it isn't needed so you can scan and then override it
+				*/
 				sscanf(line, "%s %s", graphName, graphName);
-				printf("DEBUG(name): %s\n", graphName);
+				//printf("DEBUG(name): %s\n", graphName);
 				break;
 			//end line
 			case -3:
 				return 0;
 				break;
 		}
-		getchar();
+		//getchar();
     }
 }
 
@@ -68,24 +76,22 @@ int checkLine(char *line)
 	else if(strchr(line, '}') != 0) return -3;
 }
 
-/*funktioniert noch nicht richtig!*/
 int isValid(char *string)
 {
 	int count = 0;
 	
+	//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
+	if(isalpha(*string) == 0) return 1;
+	count++;
+	string++;
+	
 	while(count <= MAX_IDENT)
 	{
-		printf("%c\n", *string);
-		if(isalpha(*string) == 0)
-		{
-			printf("Kein Buchstabe\n");
-			if(isdigit(*string) == 0) 
-			{
-				printf("Keine Zahl\n");
-				return 1;
-			}
-		}
-		if(strncmp(string, " ", 1) == 0) return 0;
+		//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
+		//if name has ended
+		if(*string == '\0') return 0;
+		//if name contains illegal char
+		if(isalpha(*string) == 0 && isdigit(*string) == 0) return 1;
 		count++;
 		string++;
 	}
