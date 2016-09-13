@@ -18,7 +18,7 @@ int getGraph(FILE *fp)
 		switch(type)
 		{
 			//new node
-			case 0:
+			case typeNode:
 				//printf("DEBUG(line):%s\n", line);
 				sscanf(line, "%s = %d", nodeA, &number);
 				//printf("DEBUG(name): %s\n", nodeA);
@@ -27,7 +27,7 @@ int getGraph(FILE *fp)
 				//else printf("Name is valid!\n");
 				break;
 			//new link
-			case -1:
+			case typeLink:
 				//printf("DEBUG(line):%s\n", line);
 				sscanf(line, "%s - %s : %d", nodeA, nodeB, &number);
 				//printf("DEBUG(nameA): %s\n", nodeA);
@@ -39,7 +39,7 @@ int getGraph(FILE *fp)
 				//else printf("Name is valid!\n");
 				break;
 			//begin line
-			case -2:
+			case typeGraph_begin:
 				//printf("DEBUG(line):%s\n", line);
 				/*
 					Not really elegant, but it works
@@ -49,7 +49,7 @@ int getGraph(FILE *fp)
 				//printf("DEBUG(name): %s\n", graphName);
 				break;
 			//end line
-			case -3:
+			case typeGraph_end:
 				return 0;
 				break;
 		}
