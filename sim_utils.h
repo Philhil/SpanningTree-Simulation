@@ -4,9 +4,11 @@
 #include <time.h>
 #include <ctype.h>
 
+typedef enum linetype { typeNode, typeCommand_blank, typeLink, typeGraph_begin, typeGraph_end } linetype;
+
 //function prototypes
 int getGraph(FILE *fp);
-int checkLine(char *line);
+linetype checkLine(char *line);
 int isValid(char *string);
 int getIndex(char *name, int nodeCnt);
 int appendNode(char *name, int nodeCnt);

@@ -11,9 +11,9 @@ int getGraph(FILE *fp)
 	char graphName[MAX_IDENT];
 	int number;
 	int nodeCnt = 0;
-	
+
     while((inp = fgets(line, MAX_LINE, fp)))
-    {	
+    {
 		type = checkLine(line);
 		switch(type)
 		{
@@ -57,34 +57,33 @@ int getGraph(FILE *fp)
     }
 }
 
-int checkLine(char *line)
+linetype checkLine(char *line)
 {
 	//Trim leading space
 	while(isspace(*line)) line++;
 
-	//return 1 if line is commentline or blank 
-	if(*line == 0)  return 1;
-	else if (strncmp(line, "//", 2) == 0) return 1;
-	
+	//return 1 if line is commentline or blank
+	if(*line == 0 || strncmp(line, "//", 2) == 0)  return typeCommand_blank;
+
 	//if it is a new node definition
-	if(strchr(line, '=') != 0) return 0;
+	if(strchr(line, '=') != 0) return typeNode;
 	//if it is a new link definition
-	else if(strchr(line, ':') != 0) return -1;
+	else if(strchr(line, ':') != 0) return typeLink;
 	//begin of graph definition
-	else if(strchr(line, '{') != 0) return -2;
+	else if(strchr(line, '{') != 0) return typeGraph_begin;
 	//end of graph definition
-	else if(strchr(line, '}') != 0) return -3;
+	else if(strchr(line, '}') != 0) return typeGraph_end;
 }
 
 int isValid(char *string)
 {
 	int count = 0;
-	
+
 	//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
 	if(isalpha(*string) == 0) return 1;
 	count++;
 	string++;
-	
+
 	while(count <= MAX_IDENT)
 	{
 		//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
@@ -100,7 +99,7 @@ int isValid(char *string)
 
 int getIndex(char *name, int nodeCnt)
 {
-	
+
 }
 
 int appendNode(char *name, int nodeCnt)
