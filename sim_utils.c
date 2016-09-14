@@ -18,26 +18,36 @@ int getGraph(FILE *fp)
 		switch(type)
 		{
 			//new node
-			case typeNode:
-				//printf("DEBUG(line):%s\n", line);
-				sscanf(line, "%s = %d", nodeA, &number);
-				//printf("DEBUG(name): %s\n", nodeA);
-				//printf("DEBUG(number): %d\n", number);
-				if(isValid(nodeA) == 1) return 1;//printf("Name not valid!\n");
-				//else printf("Name is valid!\n");
+            case typeNode:
+                sscanf(line, "%s = %d", nodeA, &number);
+#ifdef DEBUG
+                printf("DEBUG(line):%s\n", line);
+                printf("DEBUG(name): %s\n", nodeA);
+				printf("DEBUG(number): %d\n", number);
+#endif
+                if(isValid(nodeA))
+                {
+                    nodeCnt = appendNode(nodeA, nodeCnt);
+                }
 				break;
 			//new link
 			case typeLink:
-				//printf("DEBUG(line):%s\n", line);
-				sscanf(line, "%s - %s : %d", nodeA, nodeB, &number);
-				//printf("DEBUG(nameA): %s\n", nodeA);
-				//printf("DEBUG(nameB): %s\n", nodeB);
-				//printf("DEBUG(number): %d\n", number);
-				if(isValid(nodeA) == 1) return 1;//printf("Name not valid!\n");
-				//else printf("Name is valid!\n");
-				if(isValid(nodeB) == 1) return 1;//printf("Name not valid!\n");
-				//else printf("Name is valid!\n");
-				break;
+                sscanf(line, "%s - %s : %d", nodeA, nodeB, &number);
+#ifdef DEBUG
+                printf("DEBUG(line):%s\n", line);
+				printf("DEBUG(nameA): %s\n", nodeA);
+				printf("DEBUG(nameB): %s\n", nodeB);
+                printf("DEBUG(number): %d\n", number);
+#endif
+
+                if(isValid(nodeA) && isValid(nodeB))
+                {
+                    nodeCnt = appendNode(nodeA, nodeCnt);
+                    nodeCnt = appendNode(nodeB, nodeCnt);
+
+                    //TODO exist link a->b? create
+                }
+                break;
 			//begin line
 			case typeGraph_begin:
 				//printf("DEBUG(line):%s\n", line);
@@ -50,11 +60,12 @@ int getGraph(FILE *fp)
 				break;
 			//end line
 			case typeGraph_end:
-				return 0;
-				break;
+				return nodeCnt;
 		}
-		//getchar();
     }
+
+    //TODO if nodeCnt != 0 -> free nodeList
+    return 0;
 }
 
 linetype checkLine(char *line)
@@ -73,14 +84,16 @@ linetype checkLine(char *line)
 	else if(strchr(line, '{') != 0) return typeGraph_begin;
 	//end of graph definition
 	else if(strchr(line, '}') != 0) return typeGraph_end;
+
+    return typeUndefined;
 }
 
-int isValid(char *string)
+bool isValid(char *string)
 {
 	int count = 0;
 
 	//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
-	if(isalpha(*string) == 0) return 1;
+	if(isalpha(*string) == 0) return false;
 	count++;
 	string++;
 
@@ -88,31 +101,37 @@ int isValid(char *string)
 	{
 		//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
 		//if name has ended
-		if(*string == '\0') return 0;
+		if(*string == '\0') return true;
 		//if name contains illegal char
-		if(isalpha(*string) == 0 && isdigit(*string) == 0) return 1;
+		if(isalpha(*string) == 0 && isdigit(*string) == 0) return false;
 		count++;
 		string++;
 	}
-	return 1;
+	return false; //this should be never reached
 }
 
 int getIndex(char *name, int nodeCnt)
 {
-
+    return 1;
 }
 
 int appendNode(char *name, int nodeCnt)
 {
-	
+#ifdef DEBUG
+    printf("DEBUG(Append new node): %s (gesamt: %d)\n", name, nodeCnt+1);
+#endif
+
+    //TODO check if node already exist
+    nodeCnt++;
+    return nodeCnt;
 }
 
 void appendLink(int nodeCnt)
 {
-	
+
 }
 
 void sptree(int index, int nodeCnt)
 {
-	
+
 }
