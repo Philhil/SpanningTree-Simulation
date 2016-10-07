@@ -1,7 +1,7 @@
 #include "sim.h"
 #include "sim_utils.h"
 
-int getGraph(FILE *fp)
+int getGraph(FILE *fp, list *list)
 {
    	char line[MAX_LINE];
    	char* inp;
@@ -27,7 +27,7 @@ int getGraph(FILE *fp)
 #endif
                 if(isValid(nodeA))
                 {
-                    nodeCnt = appendNode(nodeA, nodeCnt);
+                    nodeCnt = appendNode(list, nodeA, nodeCnt);
                 }
 				break;
 			//new link
@@ -42,8 +42,8 @@ int getGraph(FILE *fp)
 
                 if(isValid(nodeA) && isValid(nodeB))
                 {
-                    nodeCnt = appendNode(nodeA, nodeCnt);
-                    nodeCnt = appendNode(nodeB, nodeCnt);
+                    nodeCnt = appendNode(list, nodeA, nodeCnt);
+                    nodeCnt = appendNode(list, nodeB, nodeCnt);
 
                     //TODO exist link a->b? create
                 }
@@ -115,14 +115,26 @@ int getIndex(char *name, int nodeCnt)
     return 1;
 }
 
-int appendNode(char *name, int nodeCnt)
+int appendNode(list *nodelist, char *name, int nodeCnt)
 {
+    if(!list_exist(nodelist, name, compare_node_name)) {
 #ifdef DEBUG
-    printf("DEBUG(Append new node): %s (gesamt: %d)\n", name, nodeCnt+1);
+        printf("DEBUG(Append new node): %s (gesamt: %d)\n", name, nodeCnt+1);
 #endif
+        node *newnode = malloc(sizeof(node));
+        strcpy(newnode->name, name);
+        newnode->nodeID = atoi(name);
 
-    //TODO check if node already exist
-    nodeCnt++;
+        list_append(nodelist, newnode);
+
+        if (newnode->plinks != NULL) {
+            free_node(newnode);
+        }
+        free(newnode);
+
+        nodeCnt++;
+    }
+
     return nodeCnt;
 }
 
