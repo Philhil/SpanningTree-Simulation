@@ -9,8 +9,8 @@ debug: spantree
 clean :
 	rm -rf $(OBJ)
 
-spantree: sim.o sim_utils.o list.o
-	gcc -o spantree sim.o sim_utils.o list.o $(PARAMS)
+spantree: sim.o
+	gcc -o spantree sim.o $(PARAMS)
 	rm *.o
 	sleep 3
 	clear
