@@ -29,9 +29,9 @@ typedef struct{
     int sumCosts;				//total costs to root
 
 	int msgCnt;					//counts how many times the node was used
-#ifdef DEBUG
+	#ifdef DEBUG
     int changerootCnt;          //counts how many times the root was changed
-#endif
+	#endif
 } node;
 
 typedef enum linetype { typeNode, typeCommand_blank, typeLink, typeGraph_begin, typeGraph_end, typeUndefined } linetype;
@@ -47,3 +47,11 @@ void appendLink(int nodeCnt);
 int getNeighbourRoot(int index);
 int getNeighbourCoststoRoot(int index);
 void sptree(int index, int nodeCnt);
+int getNameFromID(int id, char *name, int nodeCnt);
+int getID(int index);
+int checkIfConnected(int nodeCnt);
+int checkPaths(char *name, int nodeCnt, int *list);
+int fillList(int *list, int id, int nodeCnt);
+void printTable(int nodeCnt);
+void printTreeResult(int nodeCnt);
+void getName(char *name, int index);

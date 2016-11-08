@@ -23,9 +23,7 @@ int getGraph(FILE *fp)
             case typeNode:
                 sscanf(line, "%s = %d", nodeA, &number);
 				#ifdef DEBUG
-                printf("\nDEBUG(line):%s\n", line);
-                printf("DEBUG(name): %s\n", nodeA);
-				printf("DEBUG(number): %d\n", number);
+                printf("\nline read:%s(Node extracted: %s/id of node: %d)\n", line, nodeA, number);
 				#endif
 				if(number < 0 || number > MAX_NODE_ID)
 				{
@@ -37,14 +35,14 @@ int getGraph(FILE *fp)
                 {
 					if((indexA = getIndex(nodeA, nodeCnt)) != -1)
 					{
-						//Knoten schon vorhanden, aber keine ID definiert
+						//Node is already there, but no ID defined
 						if(pnode[indexA].nodeID == NODE_ID_INIT)
 						{
 							pnode[indexA].nodeID = number;
                             pnode[indexA].rootID = number;
                             pnode[indexA].nextHop = number;
 							#ifdef DEBUG
-							printf("DEBUG: id %d appended to node %s\n", number, pnode[indexA].name);
+							printf("id %d appended to node %s\n", number, pnode[indexA].name);
 							#endif
 						}
 					}
@@ -56,7 +54,7 @@ int getGraph(FILE *fp)
                         pnode[nodeCnt-1].rootID = number;
                         pnode[nodeCnt-1].nextHop = number;
 						#ifdef DEBUG
-						printf("DEBUG: node %s id %d appended\n", nodeA, number);
+						printf("node %s id %d appended\n", nodeA, number);
 						#endif
 					}
 				}
@@ -70,10 +68,7 @@ int getGraph(FILE *fp)
 			case typeLink:
                 sscanf(line, "%s - %s : %d", nodeA, nodeB, &number);
 				#ifdef DEBUG
-                printf("\nDEBUG(line):%s\n", line);
-				printf("DEBUG(nameA): %s\n", nodeA);
-				printf("DEBUG(nameB): %s\n", nodeB);
-                printf("DEBUG(number): %d\n", number);
+                printf("\nline read:%s(Nodes extracted: %s,%s/Costs for link: %d)\n", line, nodeA, nodeB, number);
 				#endif
 				if(number < 0 || number > MAX_COSTS)
 				{
@@ -88,7 +83,7 @@ int getGraph(FILE *fp)
                     	nodeCnt = appendNode(nodeA, nodeCnt);
 						if(nodeCnt == 0) return 0;
 						#ifdef DEBUG
-						printf("DEBUG: node %s id %d appended\n", nodeA, NODE_ID_INIT);
+						printf("node %s appended (id: %d)\n", nodeA, NODE_ID_INIT);
 						#endif
 					}
 					if(getIndex(nodeB, nodeCnt) == -1)
@@ -96,7 +91,7 @@ int getGraph(FILE *fp)
                     	nodeCnt = appendNode(nodeB, nodeCnt);
 						if(nodeCnt == 0) return 0;
 						#ifdef DEBUG
-						printf("DEBUG: node %s id %d appended\n", nodeB, NODE_ID_INIT);
+						printf("node %s appended (id: %d)\n", nodeB, NODE_ID_INIT);
 						#endif
 					}
 					
@@ -129,7 +124,7 @@ int getGraph(FILE *fp)
 				sscanf(line, "%s %s", graphName, graphName);
 				strcpy(graphname, graphName);
 				#ifdef DEBUG
-				printf("DEBUG(name): %s\n", graphname);
+				printf("(name): %s\n", graphname);
 				#endif
 				break;
 			//end line
@@ -192,6 +187,16 @@ int getIndex(char *name, int nodeCnt)
 	}
 	
     return -1;
+}
+
+void getName(char *name, int index)
+{
+	strcpy(name, pnode[index].name);
+}
+
+int getID(int index)
+{
+	return pnode[index].nodeID;
 }
 
 int appendNode(char *name, int nodeCnt)
@@ -277,63 +282,190 @@ void sptree(int index, int nodeCnt)
         {
             if (pnode[index].rootID > getNeighbourRoot(i))
             {
-#ifdef DEBUG
+				#ifdef DEBUG
                 printf("\n(%s %d): The Root of Neighbour(%s) is a better Root: myRoot=%d Root=%d, costs to root=%d",
                         pnode[index].name, pnode[index].nodeID, pnode[i].name, pnode[index].rootID, getNeighbourRoot(i), getNeighbourCoststoRoot(i));
-#endif
+				#endif
                 pnode[index].rootID = getNeighbourRoot(i);
                 pnode[index].nextHop = pnode[i].nodeID;
                 pnode[index].sumCosts = getNeighbourCoststoRoot(i) + pnode[index].plinks[i].costs;
 
-#ifdef DEBUG
+				#ifdef DEBUG
                 pnode[index].changerootCnt++;
-#endif
+				#endif
             }
             else if (pnode[index].rootID == getNeighbourRoot(i)) //is there a way with better costs?
             {
                 if (pnode[index].sumCosts > getNeighbourCoststoRoot(i) + pnode[index].plinks[i].costs)
                 {
-#ifdef DEBUG
+					#ifdef DEBUG
                     printf("\n(%s %d): Neighbour(%s) have same Root with better costs: Root=%d, my costs to root=%d, neighbour costs to root:%d",
                         pnode[index].name, pnode[index].nodeID, pnode[i].name, pnode[index].rootID, pnode[index].sumCosts, getNeighbourCoststoRoot(i) + pnode[index].plinks[i].costs);
-#endif
+					#endif
                     pnode[index].nextHop = pnode[i].nodeID;
                     pnode[index].sumCosts = getNeighbourCoststoRoot(i) + pnode[index].plinks[i].costs;
 
-#ifdef DEBUG
+					#ifdef DEBUG
                     pnode[index].changerootCnt++;
-#endif
+					#endif
                 }
             }
         }
     }
 }
 
-bool isTreeFinish(int nodeCnt)
+int getNameFromID(int id, char *name, int nodeCnt)
+{
+    for(int i = 0; i < nodeCnt; i++)
+    {
+        if(pnode[i].nodeID == id)
+        {
+			strcpy(name, pnode[i].name);
+            return 1;
+        }
+    }
+	return 0;
+}
+
+int isTreeFinish(int nodeCnt)
 {
     for(int i = 0; i < nodeCnt; i++)
     {
         if(pnode[i].msgCnt < nodeCnt)
         {
-            return false;
+            return 0;
         }
     }
-    return true;
+    return 1;
 }
 
 int checkGraph(int nodeCnt)
 {
+	int rootCnt = 0;
+	
+	//check if all nodes id's are greater than 0 
 	for(int i = 0; i < nodeCnt; i++)
 	{
 		//that means a Node was used in a Link, but was not deklared
-		if(pnode[i].nodeID == NODE_ID_INIT)
+		if(pnode[i].nodeID <= 0)
 		{
-			printf("Node %s wurde nicht definiert!\n", pnode[i].name);
+			printf("Node %s wurde nicht oder falsch definiert!\n", pnode[i].name);
+			return 0;
+		}
+		if(pnode[i].nodeID == 1)
+		{
+			rootCnt ++;
+			if(rootCnt > 1)
+			{
+				printf("Es wurden mehr als eine Root definiert!\n");
+				return 0;
+			}
+		}
+		for(i = 0; i < nodeCnt; i++)
+		{
+			for(int j = 0; j < nodeCnt; j++)
+			{
+				if(i == j)
+				{
+					if(pnode[i].plinks[j].costs != 0)
+					{
+						printf("Knoten %s ist mit sich selbst verbunden!\n", pnode[i].name);
+						return 0;
+					}
+				}
+			}
+		}
+		if(checkIfConnected(nodeCnt) == 0)
+		{
 			return 0;
 		}
 	}
 
-    return true;
+    return 1;
+}
+
+//checks if the graph is connected
+int checkIfConnected(int nodeCnt)
+{
+	int *list = NULL;
+	int *tmp = NULL;
+	
+	tmp = (int*) calloc(nodeCnt, sizeof(int));
+	if(tmp == NULL)
+	{
+		//error in calloc
+		printf("Fehler beim calloc der Liste!\n");
+		free(pnode);
+		return 0;
+	}
+	list = tmp;
+	
+	checkPaths(pnode[0].name, nodeCnt, list);
+	
+	for(int i = 0; i < nodeCnt; i++)
+	{
+		if(list[i] == 0)
+		{
+			printf("Der Graph ist nicht verbunden!\n");
+			return 0;
+		}
+	}
+	
+	return 1;
+}
+
+//checks all Paths from a given node
+int checkPaths(char *name, int nodeCnt, int *list)
+{
+	int index;
+	char newname[MAX_IDENT];
+	int id;
+	
+	index = getIndex(name, nodeCnt);
+	
+	id = getID(index);
+	if(fillList(list, id, nodeCnt) > -1)
+	{
+		#ifdef DEBUG
+		printf("added id %d to list\n", id);
+		#endif
+	}
+	else
+	{
+		return 0;
+	}
+	
+	for(int i = 0; i < nodeCnt; i++)
+	{		
+		if(pnode[index].plinks[i].costs > 0)
+		{
+			getName(newname, i);
+			#ifdef DEBUG
+			printf("check connections for %s\n", newname);
+			#endif
+			checkPaths(newname, nodeCnt, list);
+		}
+	}
+	
+	return 0;
+}
+
+int fillList(int *list, int id, int nodeCnt)
+{
+	for(int i = 0; i < nodeCnt; i++)
+	{
+		if(list[i] == id)
+		{
+			return -1;
+		}
+		else if(list[i] == 0)
+		{
+			list[i] = id;
+			return i;
+		}
+	}
+	
+	return -1;
 }
 
 void printTable(int nodeCnt)
@@ -355,20 +487,43 @@ void printTable(int nodeCnt)
 		}
 		printf("\n");
 	}
+	
+	printf("Nodes: %d\n", nodeCnt);
 }
 
 void printTreeResult(int nodeCnt)
 {
-    printf("\n\n");
+	char nodeName[MAX_IDENT+1];
+	
+    printf("\n\nSpanning-Tree of %s{", graphname);
+	if(getNameFromID(pnode[0].rootID, nodeName, nodeCnt) == 0)
+	{
+		printf("Node nicht gefunden!\n");
+		return;
+	}
+	printf("\n\tRoot: %s;", nodeName);
     for(int i = 0; i < nodeCnt; i++)
     {
-        printf("\nNode %s:%d have a Way to Root(%d) via %d with costs of: %d", pnode[i].name, pnode[i].nodeID, pnode[i].rootID, pnode[i].nextHop, pnode[i].sumCosts);
-
-#ifdef DEBUG
-            printf("\t (found in %d of total %d steps)", pnode[i].changerootCnt, pnode[i].msgCnt);
-#endif
+		if(pnode[i].nodeID != pnode[i].rootID)
+        {
+			if(getNameFromID(pnode[i].nextHop, nodeName, nodeCnt) == 0)
+			{
+				printf("Node nicht gefunden!\n");
+				return;
+			}
+			printf("\n\t%s - %s;", pnode[i].name, nodeName);
+		}
     }
-    printf("\n");
+    printf("\n}\n");
+	
+	#ifdef DEBUG
+    for(int i = 0; i < nodeCnt; i++)
+    {
+        printf("\nNode %s:%d has a Way to Root(%d) via %d with costs of: %d", pnode[i].name, pnode[i].nodeID, pnode[i].rootID, pnode[i].nextHop, pnode[i].sumCosts);
+        printf("\t (found in %d of total %d steps)", pnode[i].changerootCnt, pnode[i].msgCnt);
+    }
+	printf("\n");
+	#endif
 }
 
 int main(int argc, char *argv[])
@@ -400,18 +555,18 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	
+	#ifdef DEBUG
 	printTable(nodeCnt);
+	#endif
 	
    	if(fp!=stdin)
    	{
       	fclose(fp);
    	}
 
-    printf("Nodes: %d\n", nodeCnt);
-
     srand((int)time(NULL));
 
-    while(!isTreeFinish(nodeCnt))
+    while(isTreeFinish(nodeCnt) == 0)
     {
         sptree(rand() % nodeCnt, nodeCnt);
     }
