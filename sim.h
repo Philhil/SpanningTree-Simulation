@@ -37,21 +37,29 @@ typedef struct{
 typedef enum linetype { typeNode, typeCommand_blank, typeLink, typeGraph_begin, typeGraph_end, typeUndefined } linetype;
 
 //function prototypes
+void sptree(int index, int nodeCnt);
+
+//Build Graph
 int getGraph(FILE *fp);
+int appendNode(char *name, int nodeCnt);
+void appendLink(int nodeCnt);
+
+//validating
 int checkGraph(int nodeCnt);
 linetype checkLine(char *line);
 int isValid(char *string);
-int getIndex(char *name, int nodeCnt);
-int appendNode(char *name, int nodeCnt);
-void appendLink(int nodeCnt);
 int getNeighbourRoot(int index);
 int getNeighbourCoststoRoot(int index);
-void sptree(int index, int nodeCnt);
-int getNameFromID(int id, char *name, int nodeCnt);
-int getID(int index);
 int checkIfConnected(int nodeCnt);
 int checkPaths(char *name, int nodeCnt, int *list);
+
+//helper function
+int getIndex(char *name, int nodeCnt);
+int getNameFromID(int id, char *name, int nodeCnt);
+int getID(int index);
+void getName(char *name, int index);
 int fillList(int *list, int id, int nodeCnt);
+
+//output
 void printTable(int nodeCnt);
 void printTreeResult(int nodeCnt);
-void getName(char *name, int index);

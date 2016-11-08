@@ -3,6 +3,9 @@
 node *pnode = NULL;
 char graphname[MAX_IDENT];
 
+//Read, validate and build pnode data Array from input graph.
+//param: filepointer
+//return: number of nodes
 int getGraph(FILE *fp)
 {
    	char line[MAX_LINE];
@@ -116,7 +119,6 @@ int getGraph(FILE *fp)
                 break;
 			//begin line
 			case typeGraph_begin:
-				//printf("DEBUG(line):%s\n", line);
 				/*
 					Not really elegant, but it works
 					didn't know how to ignore the first string "Graph" but it isn't needed so you can scan and then override it
@@ -136,6 +138,9 @@ int getGraph(FILE *fp)
     return 0;
 }
 
+//check each line of input graph to decide the line type
+//input: line
+//return: linetype from enum
 linetype checkLine(char *line)
 {
 	//Trim leading space
@@ -156,18 +161,19 @@ linetype checkLine(char *line)
     return typeUndefined;
 }
 
+//Validate node name. Starting with Alpha char and not longer as MAX_IDENT
+//input: nodename
+//return: 0|1
 int isValid(char *string)
 {
 	int count = 0;
 
-	//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
 	if(isalpha(*string) == 0) return 0;
 	count++;
 	string++;
 
 	while(count <= MAX_IDENT)
 	{
-		//printf("DEBUG(char,alpha,digit): %c %d %d\n", *string, isalpha(*string), isdigit(*string));
 		//if name has ended
 		if(*string == '\0') return 1;
 		//if name contains illegal char
@@ -178,6 +184,9 @@ int isValid(char *string)
 	return 0; //this should be never reached
 }
 
+//search Index of a nodename
+//input: nodename, totalNodes in pNode array
+//return: return the index or -1
 int getIndex(char *name, int nodeCnt)
 {
 	for(int i = 0; i < nodeCnt; i++)
@@ -189,16 +198,40 @@ int getIndex(char *name, int nodeCnt)
     return -1;
 }
 
+//search the nodename of a nodename
+//input: noedid, namepointer, nodecount
+//return: 0|1
+int getNameFromID(int id, char *name, int nodeCnt)
+{
+    for(int i = 0; i < nodeCnt; i++)
+    {
+        if(pnode[i].nodeID == id)
+        {
+            strcpy(name, pnode[i].name);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+//search the nodename at index
+//input: name pointer, index
 void getName(char *name, int index)
 {
 	strcpy(name, pnode[index].name);
 }
 
+//search nodeId at index
+//input: index
+//return: nodeId
 int getID(int index)
 {
 	return pnode[index].nodeID;
 }
 
+//add a node to the global array pnode and manage Array size.
+//input: nodeName (should already be valid), nodeCount
+//return: nodeCount
 int appendNode(char *name, int nodeCnt)
 {
 	node *tmp;
@@ -226,6 +259,8 @@ int appendNode(char *name, int nodeCnt)
 	return nodeCnt;
 }
 
+//set the correct size of link array in each node and initialize the link costs with 0
+//input: nodeCount
 void appendLink(int nodeCnt)
 {
 	link* tmp;
@@ -260,20 +295,26 @@ void appendLink(int nodeCnt)
 	}
 }
 
+//get the rootid of Neighbour node
+//input: index
+//return: neighbour rootID
 int getNeighbourRoot(int index)
 {
     return pnode[index].rootID;
 }
 
+//get the rootcosts of Neighbour node
+//input: index
+//return: neighbour rootcosts
 int getNeighbourCoststoRoot(int index)
 {
     return pnode[index].sumCosts;
 }
 
+//function realize spanningtree simulation of a single node. The node ask neighbours and if necessary set its own properties.
+//input: index of node, nodeCount
 void sptree(int index, int nodeCnt)
 {
-    //ansatz: frage nachbar nach root node
-
     pnode[index].msgCnt++;
 
     for(int i = 0; i < nodeCnt; i++)
@@ -314,19 +355,9 @@ void sptree(int index, int nodeCnt)
     }
 }
 
-int getNameFromID(int id, char *name, int nodeCnt)
-{
-    for(int i = 0; i < nodeCnt; i++)
-    {
-        if(pnode[i].nodeID == id)
-        {
-			strcpy(name, pnode[i].name);
-            return 1;
-        }
-    }
-	return 0;
-}
-
+//check if cancel condition of spanningtree algorithm is reached
+//input: nodecount
+//return: 0 | 1
 int isTreeFinish(int nodeCnt)
 {
     for(int i = 0; i < nodeCnt; i++)
@@ -339,6 +370,9 @@ int isTreeFinish(int nodeCnt)
     return 1;
 }
 
+//validate if graph have start conditions
+//input: nodecount
+//return 0|1
 int checkGraph(int nodeCnt)
 {
 	int rootCnt = 0;
@@ -385,6 +419,8 @@ int checkGraph(int nodeCnt)
 }
 
 //checks if the graph is connected
+//input: nodecount
+//retunr: 0|1
 int checkIfConnected(int nodeCnt)
 {
 	int *list = NULL;
@@ -450,6 +486,9 @@ int checkPaths(char *name, int nodeCnt, int *list)
 	return 0;
 }
 
+//add a given id to a given list
+//input: listpointet, id, nodecount
+//return: index or -1 on error (already in list or list is full)
 int fillList(int *list, int id, int nodeCnt)
 {
 	for(int i = 0; i < nodeCnt; i++)
@@ -468,6 +507,8 @@ int fillList(int *list, int id, int nodeCnt)
 	return -1;
 }
 
+//print the current graph
+//input: nodecount
 void printTable(int nodeCnt)
 {
 	printf("\t");
@@ -491,6 +532,8 @@ void printTable(int nodeCnt)
 	printf("Nodes: %d\n", nodeCnt);
 }
 
+//print current Spanningtree result
+//input: nodecount
 void printTreeResult(int nodeCnt)
 {
 	char nodeName[MAX_IDENT+1];
@@ -546,9 +589,10 @@ int main(int argc, char *argv[])
       	}
    	}
 
+    //read the given Graph
 	nodeCnt = getGraph(fp);
 	
-	
+	//validate the graph
 	if(checkGraph(nodeCnt) == 0)
 	{
 		printf("Graph nicht korrekt definiert!\n");
@@ -566,6 +610,7 @@ int main(int argc, char *argv[])
 
     srand((int)time(NULL));
 
+    //run the spanningtree algorithm on a random node as long as the finish condition is not reached
     while(isTreeFinish(nodeCnt) == 0)
     {
         sptree(rand() % nodeCnt, nodeCnt);
